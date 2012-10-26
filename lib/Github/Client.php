@@ -1,17 +1,32 @@
 <?php
 
+namespace Github;
+
+use Github\Api\Api;
+use Github\Api\ApiInterface;
+use Github\Api\Commit;
+use Github\Api\Issue;
+use Github\Api\Object;
+use Github\Api\Organization;
+use Github\Api\PullRequest;
+use Github\Api\Repo;
+use Github\Api\User;
+use Github\HttpClient\HttpClientInterface;
+use Github\HttpClient\Curl;
+
 /**
  * Simple yet very cool PHP Github client
  *
- * @tutorial  http://github.com/ornicar/php-github-api/blob/master/README.markdown
- * @version   3.2
+ * @tutorial  http://github.com/imkingdavid/php-github-api/blob/master/README.markdown
+ * @version   4.0
+ * @author    David King <imkingdavid@gmail.com>
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  *
- * Website: http://github.com/ornicar/php-github-api
- * Tickets: http://github.com/ornicar/php-github-api/issues
+ * Website: http://github.com/imkingdavid/php-github-api
+ * Tickets: http://github.com/imkingdavid/php-github-api/issues
  */
-class Github_Client
+class Client
 {
     /**
      * Constant for authentication method. Indicates the default, but deprecated
@@ -34,7 +49,7 @@ class Github_Client
     /**
      * The httpClient instance used to communicate with GitHub
      *
-     * @var Github_HttpClient_Interface
+     * @var HttpClientInterface
      */
     protected $httpClient = null;
 
@@ -48,12 +63,12 @@ class Github_Client
     /**
      * Instanciate a new GitHub client
      *
-     * @param  Github_HttpClient_Interface $httpClient custom http client
+     * @param  HttpClientInterface $httpClient custom http client
      */
-    public function __construct(Github_HttpClientInterface $httpClient = null)
+    public function __construct(HttpClientInterface $httpClient = null)
     {
         if (null === $httpClient) {
-            $this->httpClient = new Github_HttpClient_Curl();
+            $this->httpClient = new Curl();
         } else {
             $this->httpClient = $httpClient;
         }
@@ -68,16 +83,16 @@ class Github_Client
      *
      * @return null
      */
-    public function authenticate($login, $secret, $method = NULL)
+    public function authenticate($login, $secret, $method = null)
     {
         if (!$method) {
             $method = self::AUTH_URL_TOKEN;
         }
 
         $this->getHttpClient()
-                ->setOption('auth_method', $method)
-                ->setOption('login', $login)
-                ->setOption('secret', $secret);
+            ->setOption('auth_method', $method)
+            ->setOption('login', $login)
+            ->setOption('secret', $secret);
     }
 
     /**
@@ -106,7 +121,7 @@ class Github_Client
 
     /**
      * Call any path, POST method
-     * Ex: $api->post('repos/show/my-username', array('email' => 'my-new-email@provider.org'))
+     * Ex: $api->post('repos/show/my-username', ['email' => 'my-new-email@provider.org'])
      *
      * @param   string  $path            the GitHub path
      * @param   array   $parameters       POST parameters
@@ -119,9 +134,37 @@ class Github_Client
     }
 
     /**
+     * Call any path, PATCH method
+     * Ex: $api->get('repos/show/my-username/my-repo')
+     *
+     * @param   string  $path            the GitHub path
+     * @param   array   $parameters       PATCH parameters
+     * @param   array   $requestOptions   reconfigure the request
+     * @return  array                     data returned
+     */
+    public function update($path, array $parameters = array(), $requestOptions = array())
+    {
+        return $this->getHttpClient()->update($path, $parameters, $requestOptions);
+    }
+
+    /**
+     * Call any path, DELETE method
+     * Ex: $api->post('repos/show/my-username', ['email' => 'my-new-email@provider.org'])
+     *
+     * @param   string  $path            the GitHub path
+     * @param   array   $parameters       DELETE parameters
+     * @param   array   $requestOptions   reconfigure the request
+     * @return  array                     data returned
+     */
+    public function delete($path, array $parameters = array(), $requestOptions = array())
+    {
+        return $this->getHttpClient()->delete($path, $parameters, $requestOptions);
+    }
+
+    /**
      * Get the http client.
      *
-     * @return  Github_HttpClient_Interface   a request instance
+     * @return  HttpClientInterface   a request instance
      */
     public function getHttpClient()
     {
@@ -135,7 +178,7 @@ class Github_Client
      *
      * @return  null
      */
-    public function setHttpClient(Github_HttpClient_Interface $httpClient)
+    public function setHttpClient(HttpClientInterface $httpClient)
     {
         $this->httpClient = $httpClient;
     }
@@ -143,12 +186,13 @@ class Github_Client
     /**
      * Get the user API
      *
-     * @return  Github_Api_User    the user API
+     * @param   bool    $newInstance  Whether or not to create a new instance
+     * @return  User    the user API
      */
-    public function getUserApi()
+    public function getUserApi($newInstance = false)
     {
-        if (!isset($this->apis['user'])) {
-            $this->apis['user'] = new Github_Api_User($this);
+        if (!isset($this->apis['user']) || $newInstance !== false) {
+            $this->apis['user'] = new User($this);
         }
 
         return $this->apis['user'];
@@ -157,12 +201,13 @@ class Github_Client
     /**
      * Get the issue API
      *
-     * @return  Github_Api_Issue   the issue API
+     * @param   bool    $newInstance  Whether or not to create a new instance
+     * @return  Issue   the issue API
      */
-    public function getIssueApi()
+    public function getIssueApi($newInstance = false)
     {
-        if (!isset($this->apis['issue'])) {
-            $this->apis['issue'] = new Github_Api_Issue($this);
+        if (!isset($this->apis['issue']) || $newInstance !== false) {
+            $this->apis['issue'] = new Issue($this);
         }
 
         return $this->apis['issue'];
@@ -171,12 +216,13 @@ class Github_Client
     /**
      * Get the commit API
      *
-     * @return  Github_Api_Commit  the commit API
+     * @param   bool    $newInstance   Whether or not to create a new instance
+     * @return  Commit  the commit API
      */
-    public function getCommitApi()
+    public function getCommitApi($newInstance = false)
     {
-        if (!isset($this->apis['commit'])) {
-            $this->apis['commit'] = new Github_Api_Commit($this);
+        if (!isset($this->apis['commit']) || $newInstance !== false) {
+            $this->apis['commit'] = new Commit($this);
         }
 
         return $this->apis['commit'];
@@ -185,12 +231,13 @@ class Github_Client
     /**
      * Get the repo API
      *
-     * @return  Github_Api_Repo  the repo API
+     * @param   bool  $newInstance    Whether or not to create a new instance
+     * @return  Repo  the repo API
      */
-    public function getRepoApi()
+    public function getRepoApi($newInstance = false)
     {
-        if (!isset($this->apis['repo'])) {
-            $this->apis['repo'] = new Github_Api_Repo($this);
+        if (!isset($this->apis['repo']) || $newInstance !== false) {
+            $this->apis['repo'] = new Repo($this);
         }
 
         return $this->apis['repo'];
@@ -199,12 +246,13 @@ class Github_Client
     /**
      * Get the organization API
      *
-     * @return  Github_Api_Organization  the object API
+     * @param   bool    $newInstance   Whether or not to create a new instance
+     * @return  Organization  the object API
      */
-    public function getOrganizationApi()
+    public function getOrganizationApi($newInstance = false)
     {
-        if (!isset($this->apis['organization'])) {
-            $this->apis['organization'] = new Github_Api_Organization($this);
+        if (!isset($this->apis['organization']) || $newInstance !== false) {
+            $this->apis['organization'] = new Organization($this);
         }
 
         return $this->apis['organization'];
@@ -213,12 +261,13 @@ class Github_Client
     /**
      * Get the object API
      *
-     * @return  Github_Api_Object  the object API
+     * @param   bool    $newInstance   Whether or not to create a new instance
+     * @return  Object  the object API
      */
-    public function getObjectApi()
+    public function getObjectApi($newInstance = false)
     {
-        if (!isset($this->apis['object'])) {
-            $this->apis['object'] = new Github_Api_Object($this);
+        if (!isset($this->apis['object']) || $newInstance !== false) {
+            $this->apis['object'] = new Object($this);
         }
 
         return $this->apis['object'];
@@ -227,12 +276,13 @@ class Github_Client
     /**
      * Get the pull request API
      *
-     * @return  Github_Api_PullRequest  the pull request API
+     * @param   bool   $newInstance   Whether or not to create a new instance
+     * @return  PullRequest  the pull request API
      */
-    public function getPullRequestApi()
+    public function getPullRequestApi($newInstance = false)
     {
-        if (!isset($this->apis['pullrequest'])) {
-            $this->apis['pullrequest'] = new Github_Api_PullRequest($this);
+        if (!isset($this->apis['pullrequest']) || $newInstance !== false) {
+            $this->apis['pullrequest'] = new PullRequest($this);
         }
 
         return $this->apis['pullrequest'];
@@ -241,12 +291,12 @@ class Github_Client
     /**
      * Inject an API instance
      *
-     * @param   string                $name the API name
-     * @param   Github_ApiInterface  $api  the API instance
+     * @param   string            $name the API name
+     * @param   ApiInterface      $api  the API instance
      *
      * @return  null
      */
-    public function setApi($name, Github_ApiInterface $instance)
+    public function setApi($name, ApiInterface $instance)
     {
         $this->apis[$name] = $instance;
 
@@ -256,8 +306,8 @@ class Github_Client
     /**
      * Get any API
      *
-     * @param   string                $name the API name
-     * @return  Github_ApiInterface  the API instance
+     * @param   string           $name the API name
+     * @return  ApiInterface     the API instance
      */
     public function getApi($name)
     {

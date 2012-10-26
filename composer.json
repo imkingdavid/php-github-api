@@ -1,20 +1,27 @@
 {
-    "name": "ornicar/github-api",
+    "name": "imkingdavid/github-api",
     "type": "library",
-    "description": "GitHub API",
-    "version": "3.3",
-    "homepage": "https://github.com/ornicar/php-github-api",
+    "description": "PHP GitHub API (for v3)",
+    "version": "4.0",
+    "homepage": "https://github.com/imkingdavid/php-github-api",
     "keywords": ["github", "api", "gist"],
     "license": "MIT",
     "authors": [
         {
+            "name": "David King",
+            "email": "imkingdavid@gmail.com",
+            "homepage": "http://www.thedavidking.com",
+            "role": "Developer"
+        },
+        {
             "name": "Thibault Duplessis",
             "email": "thibault.duplessis@gmail.com",
-            "homepage": "http://ornicar.github.com"
+            "homepage": "http://ornicar.github.com",
+            "role": "Past Developer"
         }
     ],
     "require": {
-        "php": ">=5.2",
+        "php": ">=5.4",
         "ext-curl": "*"
     },
     "autoload": {

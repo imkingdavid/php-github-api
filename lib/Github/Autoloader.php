@@ -1,9 +1,11 @@
 <?php
 
+namespace Github;
+
 /**
  * Autoloads Github classes
  */
-class Github_Autoloader
+class Autoloader
 {
     /**
      * Registers Github_Autoloader as an SPL autoloader.

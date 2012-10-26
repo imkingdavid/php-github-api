@@ -1,5 +1,7 @@
 <?php
 
+namespace Github\Api;
+
 /**
  * Searching repositories, getting repository information
  * and managing repository information for authenticated users.
@@ -8,7 +10,7 @@
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  */
-class Github_Api_Repo extends Github_Api
+class Repo extends ApiType
 {
     /**
      * Search repos by keyword

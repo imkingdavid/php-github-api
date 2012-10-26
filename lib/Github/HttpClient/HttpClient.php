@@ -1,29 +1,23 @@
 <?php
 
+namespace Github\HttpClient;
+
 /**
  * Performs requests on GitHub API. API documentation should be self-explanatory.
  *
+ * @author    David King <imkingdavid@gmail.com>
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  */
-abstract class Github_HttpClient implements Github_HttpClientInterface
+abstract class HttpClient implements HttpClientInterface
 {
     /**
      * The http client options
      * @var array
      */
-    protected $options = array(
-        'protocol'   => 'https',
-        'url'        => ':protocol://github.com/api/v2/:format/:path',
-        'format'     => 'json',
-        'user_agent' => 'php-github-api (http://github.com/ornicar/php-github-api)',
-        'http_port'  => 443,
-        'timeout'    => 10,
-        'login'      => null,
-        'token'      => null
-    );
+    protected $options = [];
 
-    protected static $history = array();
+    protected static $history = [];
 
     /**
      * Instanciate a new http client
@@ -32,30 +26,27 @@ abstract class Github_HttpClient implements Github_HttpClientInterface
      */
     public function __construct(array $options = array())
     {
-        $this->options = array_merge($this->options, $options);
+        // The values below are defaults that get overridden by the values set
+        // by the $options parameter
+        $this->options = array_merge([
+            'protocol'   => 'https',
+            'url'        => ':protocol://github.com/api/v2/:format/:path',
+            'format'     => 'json',
+            'user_agent' => 'php-github-api (http://github.com/ornicar/php-github-api)',
+            'http_port'  => 443,
+            'timeout'    => 10,
+            'login'      => null,
+            'token'      => null,
+        ], $options);
     }
 
     /**
-     * Send a request to the server, receive a response
-     *
-     * @param  string   $url           Request url
-     * @param  array    $parameters    Parameters
-     * @param  string   $httpMethod    HTTP method to use
-     * @param  array    $options        Request options
-     *
-     * @return string   HTTP response
+     * @inheritdoc
      */
     abstract protected function doRequest($url, array $parameters = array(), $httpMethod = 'GET', array $options = array());
 
     /**
-     * Send a GET request
-     *
-     * @param  string   $path            Request path
-     * @param  array    $parameters     GET Parameters
-     * @param  string   $httpMethod     HTTP method to use
-     * @param  array    $options        Request options
-     *
-     * @return array                    Data
+     * @inheritdoc
      */
     public function get($path, array $parameters = array(), array $options = array())
     {
@@ -63,14 +54,7 @@ abstract class Github_HttpClient implements Github_HttpClientInterface
     }
 
     /**
-     * Send a POST request
-     *
-     * @param  string   $path            Request path
-     * @param  array    $parameters     POST Parameters
-     * @param  string   $httpMethod     HTTP method to use
-     * @param  array    $options        reconfigure the request for this call only
-     *
-     * @return array                    Data
+     * @inheritdoc
      */
     public function post($path, array $parameters = array(), array $options = array())
     {
@@ -78,15 +62,23 @@ abstract class Github_HttpClient implements Github_HttpClientInterface
     }
 
     /**
-     * Send a request to the server, receive a response,
-     * decode the response and returns an associative array
-     *
-     * @param  string   $path            Request API path
-     * @param  array    $parameters     Parameters
-     * @param  string   $httpMethod     HTTP method to use
-     * @param  array    $options        Request options
-     *
-     * @return array                    Data
+     * @inheritdoc
+     */
+    public function update($path, array $parameters = array(), array $options = array())
+    {
+        return $this->request($path, $parameters, 'PATCH', $options);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function delete($path, array $parameters = array(), array $options = array())
+    {
+        return $this->request($path, $parameters, 'DELETE', $options);
+    }
+
+    /**
+     * @inheritdoc
      */
     public function request($path, array $parameters = array(), $httpMethod = 'GET', array $options = array())
     {
@@ -95,11 +87,11 @@ abstract class Github_HttpClient implements Github_HttpClientInterface
         $options = array_merge($this->options, $options);
 
         // create full url
-        $url = strtr($options['url'], array(
+        $url = strtr($options['url'], [
             ':protocol' => $options['protocol'],
             ':format'   => $options['format'],
             ':path'     => trim($path, '/')
-        ));
+        ]);
 
         // get encoded response
         $response = $this->doRequest($url, $parameters, $httpMethod, $options);
@@ -117,22 +109,17 @@ abstract class Github_HttpClient implements Github_HttpClientInterface
      */
     protected function decodeResponse($response, array $options)
     {
-        if ('text' === $options['format']) {
+        if ($options['format'] === 'text') {
             return $response;
-        } elseif ('json' === $options['format']) {
+        } elseif ($options['format'] === 'json') {
             return json_decode($response, true);
         }
 
-        throw new Exception(__CLASS__.' only supports json & text format, '.$options['format'].' given.');
+        throw new \Exception(__CLASS__ . ' only supports json & text format, ' . $options['format'] . ' given.');
     }
 
     /**
-     * Change an option value.
-     *
-     * @param string $name   The option name
-     * @param mixed  $value  The value
-     *
-     * @return Github_HttpClientInterface The current object instance
+     * @inheritdoc
      */
     public function setOption($name, $value)
     {
@@ -152,10 +139,12 @@ abstract class Github_HttpClient implements Github_HttpClientInterface
     protected function updateHistory()
     {
         self::$history[] = time();
-        if (30 === count(self::$history)) {
+
+        if (count(self::$history) === 30) {
             if (reset(self::$history) >= (time() - 35)) {
                 sleep(2);
             }
+
             array_shift(self::$history);
         }
     }

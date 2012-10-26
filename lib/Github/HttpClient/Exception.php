@@ -1,18 +1,21 @@
 <?php
 
+namespace Github\HttpClient;
+
 /**
  * HttpClient communication error
  *
+ * @author    David King <imkingdavid@gmail.com>
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  */
-class Github_HttpClient_Exception extends Exception
+class Exception extends \Exception
 {
     /**
      * Http header-codes
      * @var  array
      */
-    static protected $statusCodes = array(
+    static protected $statusCodes = [
         0 => 'OK',
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -54,7 +57,7 @@ class Github_HttpClient_Exception extends Exception
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported'
-    );
+    ];
 
     /**
      * Default constructor
@@ -64,7 +67,7 @@ class Github_HttpClient_Exception extends Exception
      */
     public function __construct($message = null, $code = null)
     {
-        if (null === $message && null !== $code && array_key_exists((int) $code, self::$statusCodes)) {
+        if ($message === null && $code !== null && array_key_exists((int) $code, self::$statusCodes)) {
             $message = sprintf('HTTP %d: %s', $code, self::$statusCodes[(int) $code]);
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace Github\Api;
+
 /**
  * Searching organizations, getting organization information
  * and managing authenticated organization account information.
@@ -8,7 +10,7 @@
  * @author    Antoine Berranger <antoine at ihqs dot net>
  * @license   MIT License
  */
-class Github_Api_Organization extends Github_Api
+class Organization extends ApiType
 {
     const ADMIN = "admin";
     const PUSH = "push";

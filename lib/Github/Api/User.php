@@ -1,5 +1,7 @@
 <?php
 
+namespace Github\Api;
+
 /**
  * Searching users, getting user information
  * and managing authenticated user account information.
@@ -8,10 +10,10 @@
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  */
-class Github_Api_User extends Github_Api
+class User extends ApiType
 {
     /**
-     * Search users by username
+     * Get information about a user by username
      * http://develop.github.com/p/users.html#searching_for_users
      *
      * @param   string  $username         the username to search
@@ -19,13 +21,13 @@ class Github_Api_User extends Github_Api
      */
     public function search($username)
     {
-        $response = $this->get('user/search/'.urlencode($username));
+        $response = $this->get('users/' . urlencode($username));
 
         return $response['users'];
     }
 
     /**
-     * Get extended information about a user by its username
+     * Get information about the currently authenticated user
      * http://develop.github.com/p/users.html#getting_user_information
      *
      * @param   string  $username         the username to show
@@ -33,7 +35,7 @@ class Github_Api_User extends Github_Api
      */
     public function show($username)
     {
-        $response = $this->get('user/show/'.urlencode($username));
+        $response = $this->get('user');
 
         return $response['user'];
     }
@@ -49,7 +51,7 @@ class Github_Api_User extends Github_Api
      */
     public function update($username, array $data)
     {
-        $response = $this->post('user/show/'.urlencode($username), array('values' => $data));
+        $response = $this->update('user', $data);
 
         return $response['user'];
     }
@@ -61,11 +63,24 @@ class Github_Api_User extends Github_Api
      * @param   string  $username         the username
      * @return  array                     list of followed users
      */
-    public function getFollowing($username)
+    public function getFollowing($username = '')
     {
-        $response = $this->get('user/show/'.urlencode($username).'/following');
+        $response = $this->get(empty($username) ? 'user/following' : 'users/' . urlencode($username) . '/following');
 
         return $response['users'];
+    }
+
+    /**
+     * Get whether or not the authenticated user is following the given user
+     *
+     * @param string $username Username of the potentially followed user
+     * @return bool
+     */
+    public function amIFollowing($username)
+    {
+        $response = $this->get('user/following/' . urlencode($username));
+
+        return $response['user'];
     }
 
     /**
@@ -75,9 +90,9 @@ class Github_Api_User extends Github_Api
      * @param   string  $username         the username
      * @return  array                     list of following users
      */
-    public function getFollowers($username)
+    public function getFollowers($username = '')
     {
-        $response = $this->get('user/show/'.urlencode($username).'/followers');
+        $response = $this->get(empty($username) ? 'user/followers' : 'users/' . urlencode($username) . '/followers');
 
         return $response['users'];
     }
@@ -91,7 +106,7 @@ class Github_Api_User extends Github_Api
      */
     public function follow($username)
     {
-        $response = $this->post('user/follow/'.urlencode($username));
+        $response = $this->post('user/following/' . urlencode($username));
 
         return $response['users'];
     }
@@ -105,7 +120,7 @@ class Github_Api_User extends Github_Api
      */
     public function unFollow($username)
     {
-        $response = $this->post('user/unfollow/'.urlencode($username));
+        $response = $this->delete('user/following/' . urlencode($username));
 
         return $response['users'];
     }
@@ -125,11 +140,24 @@ class Github_Api_User extends Github_Api
     }
 
     /**
-     * Get the authenticated user public keys. Requires authentication
+     * Get the authenticated user's public keys. Requires authentication
      *
      * @return  array                     list of public keys of the user
      */
     public function getKeys()
+    {
+        $response = $this->get('user/keys');
+
+        return $response['public_keys'];
+    }
+
+    /**
+     * Get a public key of the authenticated user. Requires authentication
+     *
+     * @param int $id      Key ID
+     * @return  array         Info about the given public key
+     */
+    public function getKey($id)
     {
         $response = $this->get('user/keys');
 
@@ -143,7 +171,19 @@ class Github_Api_User extends Github_Api
      */
     public function addKey($title, $key)
     {
-        $response = $this->post('user/key/add', array('title' => $title, 'key' => $key));
+        $response = $this->post('user/keys', array('title' => $title, 'key' => $key));
+
+        return $response['public_keys'];
+    }
+
+    /**
+     * Update a public key for the authenticated user. Requires authentication.
+     *
+     * @return  array                    list of public keys of the user
+     */
+    public function updateKey($id, $title, $key)
+    {
+        $response = $this->request('user/keys/' . $id, array('title' => $title, 'key' => $key), 'PATCH');
 
         return $response['public_keys'];
     }
@@ -155,7 +195,7 @@ class Github_Api_User extends Github_Api
      */
     public function removeKey($id)
     {
-        $response = $this->post('user/key/remove', array('id' => $id));
+        $response = $this->delete('user/keys/' . $id);
 
         return $response['public_keys'];
     }
@@ -179,7 +219,7 @@ class Github_Api_User extends Github_Api
      */
     public function addEmail($email)
     {
-        $response = $this->post('user/email/add', array('email' => $email));
+        $response = $this->post('user/emails', array('email' => $email));
 
         return $response['emails'];
     }
@@ -191,7 +231,7 @@ class Github_Api_User extends Github_Api
      */
     public function removeEmail($email)
     {
-        $response = $this->post('user/email/remove', array('email' => $email));
+        $response = $this->post('user/emails', array('email' => $email));
 
         return $response['emails'];
     }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Github\Api;
+
 /**
  * API for accessing Pull Requests from your Git/Github repositories.
  *
@@ -7,7 +9,7 @@
  * @author    Nicolas Pastorino <nicolas.pastorino at gmail dot com>
  * @license   MIT License
  */
-class Github_Api_PullRequest extends Github_Api
+class PullRequest extends ApiType
 {
     /**
      * Get a listing of a project's pull requests by the username, repo, and optionnally state.

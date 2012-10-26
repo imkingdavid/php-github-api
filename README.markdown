@@ -1,32 +1,33 @@
-# GithHub API v2 is deprecated
-
-And therefore, so is this library. You may fork it and implement v3 support.
-
 # PHP GitHub API
 
-A simple Object Oriented wrapper for GitHub API, written with PHP5. 
+A simple Object Oriented wrapper for GitHub API v3, written with PHP 5. 
 
 ```php
     $github = new Github_Client();
     $myRepos = $github->getRepoApi()->getUserRepos('ornicar');
 ```
 
-Uses [GitHub API v2](http://develop.github.com/). The object API is very similar to the RESTful API.
+Uses [GitHub API v3](http://api.github.com/).
+
+<a name='nav'></a>
+[Users][] | [Issues][] | [Commits][] | [Objects][] | [Repos][] | [Pull Requests][] | [Request any Route][] | [Authentication & Security][] | [Customize php-github-api][] | [Run Test Suite][]
 
 ## Features
 
 * Covers 100% of GitHub API with PHP methods
 * Supports 3 authentication methods
-* Follows PEAR conventions and coding standard: autoload friendly
+* Follows [PHP-FIG](http://www.php-fig.org/) coding standards
+* Uses namespaces and [PSR-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md) style naming conventions for autoloading
+* Uses Composer for project management
 * Light and fast thanks to lazy loading of API classes
-* Flexible and extensible thanks to dependency injection
+* Flexible and extensible, (utilizes dependency injection)
 * Extensively tested and documented
 
 ## Requirements
 
-* PHP 5.2 or 5.3.
+* PHP: >=5.4
 * [php curl](http://php.net/manual/en/book.curl.php), but it is possible to write another transport layer.
-* PHPUnit to run tests.
+* PHPUnit test framework
 
 ## Autoload
 
@@ -48,11 +49,6 @@ Replace the `/path/to/lib/` path with the path you used for php-github-api insta
 ```
 
 From this object, you can access to all GitHub apis, listed below.
-
-<a name='nav'></a>
-## Navigation
-
-[Users][] | [Issues][] | [Commits][] | [Objects][] | [Repos][] | [Pull Requests][] | [Request any Route][] | [Authentication & Security][] | [Customize php-github-api][] | [Run Test Suite][]
 
 <a name='users'></a>
 ## Users

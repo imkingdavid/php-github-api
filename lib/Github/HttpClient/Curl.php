@@ -1,12 +1,15 @@
 <?php
 
+namespace Github\HttpClient;
+
 /**
  * Performs requests on GitHub API. API documentation should be self-explanatory.
  *
+ * @author    David King <imkingdavid@gmail.com>
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  */
-class Github_HttpClient_Curl extends Github_HttpClient
+class Curl extends HttpClient
 {
     /**
      * Send a request to the server, receive a response

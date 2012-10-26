@@ -1,5 +1,7 @@
 <?php
 
+namespace Github\Api;
+
 /**
  * Getting full versions of specific files and trees in your Git repositories.
  *
@@ -7,7 +9,7 @@
  * @author    Thibault Duplessis <thibault.duplessis at gmail dot com>
  * @license   MIT License
  */
-class Github_Api_Object extends Github_Api
+class Object extends ApiType
 {
     /**
      * Get a listing of the root tree of a project by the username, repo, and tree SHA
